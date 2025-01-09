@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Will You Date Me?</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #ffe6f2;
+        }
+
+        h1 {
+            color: #ff4081;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .yes {
+            background-color: #ff4081;
+            color: white;
+        }
+
+        .yes:hover {
+            background-color: #ff6b9b;
+        }
+
+        .no {
+            background-color: #cccccc;
+        }
+
+        #message {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #ff4081;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Would you date me?</h1>
+    <div id="buttons">
+        <button class="yes" onclick="showMessage()">Yes</button>
+        <button class="no" onclick="handleNoClick()">No</button>
+    </div>
+    <p id="message"></p>
+
+    <script>
+        let noClickCount = 0;
+        const noResponses = [
+            "Please reconsider!", 
+            "Give me one more chance!", 
+            "Think it through!", 
+            "I promise it'll be great!", 
+            "Why not give it a try?", 
+            "You might just enjoy it!", 
+            "What's holding you back?", 
+            "This could be amazing!", 
+            "Take a leap of faith!", 
+            "Alright, say Yes already!"
+        ];
+
+        function handleNoClick() {
+            noClickCount++;
+            const yesButton = document.querySelector('.yes');
+            const message = document.getElementById("message");
+
+            // Update message
+            if (noClickCount <= noResponses.length) {
+                message.textContent = noResponses[noClickCount - 1];
+            } else {
+                message.textContent = "You have no other choice now!";
+            }
+
+            // Increase size of Yes button
+            const newSize = 16 + noClickCount * 4;
+            yesButton.style.fontSize = `${newSize}px`;
+            yesButton.style.padding = `${10 + noClickCount}px ${20 + noClickCount * 2}px`;
+
+            // If Yes button covers the screen
+            if (newSize > 100) {
+                yesButton.style.width = "100vw";
+                yesButton.style.height = "100vh";
+                yesButton.style.fontSize = "32px";
+                yesButton.textContent = "YES";
+            }
+        }
+
+        function showMessage() {
+            const message = document.getElementById("message");
+            const buttons = document.getElementById("buttons");
+            buttons.innerHTML = ""; // Remove all buttons
+            message.innerHTML = `Let's go on a date!  ❤️<br><small>Please pick a less expensive venue.</small>`;
+        }
+    </script>
+</body>
+</html>
