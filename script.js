@@ -1,99 +1,72 @@
-const currentYear = new Date().getFullYear().toString();
-const columns = ["Name", "Score", "Time"];
+let score = 0;
+let startTime;
 
-function selectOrCreateSheet(sheetName, url = null) {
-    let app;
-    if (url) {
-        app = SpreadsheetApp.openByUrl(url);
-    } else {
-        app = SpreadsheetApp.getActiveSpreadsheet();
+function startGame() {
+    const playerName = document.getElementById('playerName').value.trim();
+    if (!playerName) {
+        alert('Please enter your name!');
+        return;
     }
-    let sheet = app.getSheetByName(sheetName);
-    if (!sheet) {
-        sheet = app.insertSheet(sheetName);
-        sheet.appendRow(columns);
-    } else if (sheet.getLastColumn() < 1) {
-        sheet.appendRow(columns);
-    }
-    return sheet;
+    document.getElementById('nameStep').style.display = 'none';
+    document.getElementById('gameStep').style.display = 'block';
+    startTime = new Date();
 }
 
-function getColumn(sheetName, column, url = null) {
-    let sheet = selectOrCreateSheet(sheetName, url);
-    const lastColumn = sheet.getLastColumn();
-    if (lastColumn < 1) {
-        throw new Error(`Sheet "${sheetName}" is empty or has no columns`);
-    }
-    const headers = sheet.getRange(1, 1, 1, lastColumn).getValues()[0];
-    const lowerHeaders = headers.map(header => header.toString().toLowerCase());
-    const lowerColumn = column.toLowerCase();
-    const columnIndex = lowerHeaders.indexOf(lowerColumn);
-
-    if (sheet.getLastRow() <= 1) {
-        return [];
-    }
-    const columnValues = sheet.getRange(2, columnIndex + 1, sheet.getLastRow() - 1, 1).getValues();
-    const flattenedValues = columnValues.map(row => row[0]);
-    return flattenedValues;
+function moveNoButton() {
+    const noButton = document.querySelector('.no');
+    const x = Math.random() * (window.innerWidth - noButton.offsetWidth);
+    const y = Math.random() * (window.innerHeight - noButton.offsetHeight);
+    noButton.style.left = `${x}px`;
+    noButton.style.top = `${y}px`;
+    score += 1;
 }
 
-function getMembershipData() {
-    const jsonData = {};
-    columns.forEach(column => {
-        jsonData[column] = getColumn(currentYear, column);
-    });
+async function showMessage() {
+    const playerName = document.getElementById('playerName').value;
+    const endTime = new Date();
+    const timeSpent = ((endTime - startTime) / 1000).toFixed(2);
 
-    const dataLength = jsonData[columns[0]].length;
-    if (dataLength === 0) {
-        return [];
-    }
+    document.getElementById('gameStep').style.display = 'none';
+    document.getElementById('leaderboardStep').style.display = 'block';
 
-    const result = [];
-    for (let i = 0; i < dataLength; i++) {
-        let rowData = {};
-        columns.forEach(column => {
-            rowData[column] = jsonData[column][i];
+    const scoreData = {
+        Name: playerName,
+        Score: score,
+        Time: timeSpent
+    };
+
+    try {
+        await fetch('https://script.google.com/macros/s/AKfycbxFzsHMDymNhAqfpxoXdzrHvNYo0IfmjWiUpjY9fy_cf_7WoUnJh8ZAZ8B4cEGgAGQV/exec', {
+            method: 'POST',
+            body: JSON.stringify(scoreData)
         });
-        result.push(rowData);
+
+        await fetchLeaderboard();
+
+        const message = document.createElement('p');
+        message.innerHTML = `Let's go on a date! ❤️<br>Your score: ${score}<br>Time: ${timeSpent}s`;
+        document.getElementById('leaderboardStep').prepend(message);
+    } catch (error) {
+        console.log('Error:', error);
     }
-
-    return result;
 }
 
+async function fetchLeaderboard() {
+    try {
+        const response = await fetch('https://script.google.com/macros/s/AKfycbxFzsHMDymNhAqfpxoXdzrHvNYo0IfmjWiUpjY9fy_cf_7WoUnJh8ZAZ8B4cEGgAGQV/exec');
+        const data = await response.json();
+        const scoreBody = document.getElementById('scoreBody');
+        scoreBody.innerHTML = '';
 
-function appendJsonToSheet(sheetName, jsonData) {
-    let sheet = selectOrCreateSheet(sheetName);
-    const headers = Object.keys(jsonData[0]);
-
-    jsonData.forEach(rowData => {
-        const row = headers.map(header => rowData[header]);
-        sheet.appendRow(row);
-    });
-}
-
-function main() {
-    const membershipData = getMembershipData();
-    Logger.log(JSON.stringify(membershipData, null, 2));
-    appendJsonToSheet(currentYear, membershipData);
-}
-
-function getScoresSorted() {
-    const membershipData = getMembershipData();
-    return membershipData.sort((a, b) => b.Score - a.Score);
-}
-
-function appendRow(name, score, time) {
-    const sheet = selectOrCreateSheet(currentYear);
-    sheet.appendRow([name, score, time]);
-}
-
-function doGet() {
-    const scores = getScoresSorted();
-    return ContentService.createTextOutput(JSON.stringify(scores)).setMimeType(ContentService.MimeType.JSON);
-}
-
-function doPost(e) {
-    const data = JSON.parse(e.postData.contents);
-    appendRow(data.Name, data.Score, data.Time);
-    return ContentService.createTextOutput(JSON.stringify({ status: 'success' })).setMimeType(ContentService.MimeType.JSON);
+        data.slice(0, 10).forEach(entry => {
+            const row = `<tr>
+            <td>${entry.Name}</td>
+            <td>${entry.Score}</td>
+            <td>${entry.Time}</td>
+        </tr>`;
+            scoreBody.innerHTML += row;
+        });
+    } catch (error) {
+        console.log('Error fetching leaderboard:', error);
+    }
 }
