@@ -28,6 +28,7 @@ async function showMessage() {
 
     document.getElementById('gameStep').style.display = 'none';
     document.getElementById('leaderboardStep').style.display = 'block';
+    document.getElementById('scoreBody').innerHTML = '<tr><td colspan="3">Loading scores...</td></tr>';
 
     const scoreData = {
         Name: playerName,
@@ -36,20 +37,25 @@ async function showMessage() {
     };
 
     try {
+        const message = document.createElement('p');
+        message.innerHTML = `Let's go on a date! ❤️<br>Your score: ${score}<br>Time: ${timeSpent}s`;
+        document.getElementById('leaderboardStep').prepend(message);
+
         await fetch('https://script.google.com/macros/s/AKfycbxFzsHMDymNhAqfpxoXdzrHvNYo0IfmjWiUpjY9fy_cf_7WoUnJh8ZAZ8B4cEGgAGQV/exec', {
             method: 'POST',
             body: JSON.stringify(scoreData)
         });
 
-        await fetchLeaderboard();
+        setTimeout(async () => {
+            await fetchLeaderboard();
+        }, 1000);
 
-        const message = document.createElement('p');
-        message.innerHTML = `Let's go on a date! ❤️<br>Your score: ${score}<br>Time: ${timeSpent}s`;
-        document.getElementById('leaderboardStep').prepend(message);
     } catch (error) {
         console.log('Error:', error);
+        document.getElementById('scoreBody').innerHTML = '<tr><td colspan="3">Error loading scores</td></tr>';
     }
 }
+
 
 async function fetchLeaderboard() {
     try {
