@@ -88,6 +88,12 @@
     width: 100%;
     overflow: auto;
  }
+ input:focus,
+ select:focus,
+ textarea:focus,
+ button:focus {
+     outline: none;
+ }
 
  th,
  td {
