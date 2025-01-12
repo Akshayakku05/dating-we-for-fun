@@ -70,7 +70,7 @@ async function fetchLeaderboard() {
         const scoreBody = document.getElementById('scoreBody');
         scoreBody.innerHTML = '';
 
-        data.slice(0, 10).forEach(entry => {
+        data.forEach(entry => {
             const row = `<tr>
             <td>${entry.Name}</td>
             <td>${entry.Score}</td>
