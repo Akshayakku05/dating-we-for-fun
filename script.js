@@ -40,8 +40,15 @@ async function showMessage() {
         const message = document.createElement('p');
         message.innerHTML = `Let's go on a date! ❤️<br>Your score: ${score}<br>Time: ${timeSpent}s`;
         document.getElementById('leaderboardStep').prepend(message);
+        
+        await fetch(`
 
-        await fetch('https://script.google.com/macros/s/AKfycbxFzsHMDymNhAqfpxoXdzrHvNYo0IfmjWiUpjY9fy_cf_7WoUnJh8ZAZ8B4cEGgAGQV/exec', {
+
+            https://script.google.com/macros/s/AKfycbxFzsHMDymNhAqfpxoXdzrHvNYo0IfmjWiUpjY9fy_cf_7WoUnJh8ZAZ8B4cEGgAGQV/exec
+            
+
+
+            `.trim(), {
             method: 'POST',
             body: JSON.stringify(scoreData)
         });

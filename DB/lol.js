@@ -79,7 +79,12 @@ function main() {
 
 function getScoresSorted() {
     const membershipData = getMembershipData();
-    return membershipData.sort((a, b) => b.Score - a.Score);
+    return membershipData.sort((a, b) => {
+        if (b.Score !== a.Score) {
+            return b.Score - a.Score;
+        }
+        return parseFloat(a.Time) - parseFloat(b.Time);
+    });
 }
 
 function appendRow(name, score, time) {
