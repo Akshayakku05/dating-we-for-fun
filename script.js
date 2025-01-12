@@ -44,8 +44,7 @@ async function showMessage() {
         await fetch(`
 
 
-            https://script.google.com/macros/s/AKfycbxFzsHMDymNhAqfpxoXdzrHvNYo0IfmjWiUpjY9fy_cf_7WoUnJh8ZAZ8B4cEGgAGQV/exec
-            
+https://script.google.com/macros/s/AKfycbxFzsHMDymNhAqfpxoXdzrHvNYo0IfmjWiUpjY9fy_cf_7WoUnJh8ZAZ8B4cEGgAGQV/exec            
 
 
             `.trim(), {

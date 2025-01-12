@@ -1,6 +1,7 @@
 const currentYear = new Date().getFullYear().toString();
 const columns = ["Name", "Score", "Time"];
 
+
 function selectOrCreateSheet(sheetName, url = null) {
     let app;
     if (url) {
@@ -79,26 +80,57 @@ function main() {
 
 function getScoresSorted() {
     const membershipData = getMembershipData();
-    return membershipData.sort((a, b) => {
-        if (b.Score !== a.Score) {
-            return b.Score - a.Score;
+
+    const highestScores = new Map();
+
+    membershipData.forEach(entry => {
+        if (!highestScores.has(entry.Name) ||
+            highestScores.get(entry.Name).Score < entry.Score) {
+            highestScores.set(entry.Name, entry);
         }
-        return parseFloat(a.Time) - parseFloat(b.Time);
     });
+
+    return Array.from(highestScores.values())
+        .sort((a, b) => b.Score - a.Score);
 }
 
 function appendRow(name, score, time) {
     const sheet = selectOrCreateSheet(currentYear);
-    sheet.appendRow([name, score, time]);
+    const sanitizedName = sanitizeInput(name);
+    sheet.appendRow([sanitizedName, score, time]);
 }
+
+
 
 function doGet() {
     const scores = getScoresSorted();
     return ContentService.createTextOutput(JSON.stringify(scores)).setMimeType(ContentService.MimeType.JSON);
 }
 
+function sanitizeInput(str) {
+    return String(str)
+        .replace(/[<>]/g, '') 
+        .replace(/[&]/g, '&amp;')
+        .replace(/["]/g, '&quot;')
+        .replace(/[']/g, '&#39;')
+        .trim();
+}
+
+
 function doPost(e) {
     const data = JSON.parse(e.postData.contents);
-    appendRow(data.Name, data.Score, data.Time);
-    return ContentService.createTextOutput(JSON.stringify({ status: 'success' })).setMimeType(ContentService.MimeType.JSON);
+    const score = Number(data.Score);
+    const time = Number(data.Time);
+
+    if (isNaN(score) || isNaN(time) || !data.Name) {
+        return ContentService.createTextOutput(JSON.stringify({
+            status: 'error',
+            message: 'Invalid input'
+        })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    appendRow(data.Name, score, time);
+    return ContentService.createTextOutput(JSON.stringify({
+        status: 'success'
+    })).setMimeType(ContentService.MimeType.JSON);
 }
