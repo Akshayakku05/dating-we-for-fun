@@ -116,16 +116,23 @@ function sanitizeInput(str) {
         .trim();
 }
 
+function isReasonableScore(score) {
+    return score >= 0 && score <= 10000000 && Number.isFinite(score);
+}
+
+function isReasonableTime(time) {
+    return time >= 0 && time <= 3000000 && Number.isFinite(time);
+}
 
 function doPost(e) {
     const data = JSON.parse(e.postData.contents);
     const score = Number(data.Score);
     const time = Number(data.Time);
 
-    if (isNaN(score) || isNaN(time) || !data.Name) {
+    if (!data.Name || !isReasonableScore(score) || !isReasonableTime(time)) {
         return ContentService.createTextOutput(JSON.stringify({
             status: 'error',
-            message: 'Invalid input'
+            message: 'Invalid score or time range'
         })).setMimeType(ContentService.MimeType.JSON);
     }
 

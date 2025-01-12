@@ -1,6 +1,11 @@
 let score = 0;
 let startTime;
+APPSCRIPT_URL = `
 
+
+https://script.google.com/macros/s/AKfycbxFzsHMDymNhAqfpxoXdzrHvNYo0IfmjWiUpjY9fy_cf_7WoUnJh8ZAZ8B4cEGgAGQV/exec
+
+            `.trim()
 function startGame() {
     const playerName = document.getElementById('playerName').value.trim();
     if (!playerName) {
@@ -41,13 +46,7 @@ async function showMessage() {
         message.innerHTML = `Let's go on a date! ❤️<br>Your score: ${score}<br>Time: ${timeSpent}s`;
         document.getElementById('leaderboardStep').prepend(message);
         
-        await fetch(`
-
-
-https://script.google.com/macros/s/AKfycbxFzsHMDymNhAqfpxoXdzrHvNYo0IfmjWiUpjY9fy_cf_7WoUnJh8ZAZ8B4cEGgAGQV/exec            
-
-
-            `.trim(), {
+        await fetch(APPSCRIPT_URL, {
             method: 'POST',
             body: JSON.stringify(scoreData)
         });
@@ -65,7 +64,7 @@ https://script.google.com/macros/s/AKfycbxFzsHMDymNhAqfpxoXdzrHvNYo0IfmjWiUpjY9f
 
 async function fetchLeaderboard() {
     try {
-        const response = await fetch('https://script.google.com/macros/s/AKfycbxFzsHMDymNhAqfpxoXdzrHvNYo0IfmjWiUpjY9fy_cf_7WoUnJh8ZAZ8B4cEGgAGQV/exec');
+        const response = await fetch(APPSCRIPT_URL);
         const data = await response.json();
         const scoreBody = document.getElementById('scoreBody');
         scoreBody.innerHTML = '';
